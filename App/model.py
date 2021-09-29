@@ -29,22 +29,94 @@ import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-from DISClib.Algorithms.Sorting import shellsort as sa
 assert cf
 
-"""
-Se define la estructura de un catálogo de videos. El catálogo tendrá dos listas, una para los videos, otra para las categorias de
-los mismos.
-"""
 
 # Construccion de modelos
 
+
+def newCatalog():
+    """
+    Inicializa el catálogo de libros.
+    Retorna el catalogo inicializado.
+    """
+
+    catalog = {'artists': None,
+               'artworks': None,
+               'medium': None}
+
+    catalog['artists'] = lt.newList('SINGLE_LINKED')
+    catalog['artworks'] = lt.newList('SINGLE_LINKED')
+
+    """
+    A continuacion se crean indices por diferentes criterios
+    para llegar a la informacion consultada.
+    Estos indices no replican informacion, solo la referencian.
+    """
+
+    catalog['medium'] = mp.newMap(2000,
+                                  maptype='CHAINING',
+                                  loadfactor=3)
+
+    return catalog
+
+
 # Funciones para agregar informacion al catalogo
+
+
+def addArtist(catalog, artist):
+    lt.addLast(catalog['artists'], artist)
+
+
+def addArtwork(catalog, artwork):
+    lt.addLast(catalog['artworks'], artwork)
+    artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
+    artists_id = artists_id.split(', ')
+
+    for id in artists_id:
+        addMedium(catalog, id, artwork)
+
+
+def addMedium(catalog, id, artwork):
+    """
+    ...
+    """
+    exist_id = mp.contains(catalog['medium'], id)
+    map = mp.newMap(3,
+                    maptype='CHAINING',
+                    loadfactor=3)
+    arrayList = lt.newList('ARRAY_LIST')
+
+    if exist_id:
+        pass
+    else:
+        mp.put(catalog['medium'], id, map)
+
+    id = mp.get(catalog['medium'], id)
+    map = me.getValue(id)
+    medium = artwork['Medium']
+    exist_medium = mp.contains(map, medium)
+
+    if exist_medium:
+        pass
+    else:
+        mp.put(map, medium, arrayList)
+
+    medium = mp.get(map, medium)
+    arrayList = me.getValue(medium)
+    lt.addLast(arrayList, artwork)
+
 
 # Funciones para creacion de datos
 
+
 # Funciones de consulta
 
-# Funciones utilizadas para comparar elementos dentro de una lista
+# Funciones de comparación
+
+
+def compareMedium(medium, entry):
+    pass
+
 
 # Funciones de ordenamiento

@@ -31,7 +31,46 @@ El controlador se encarga de mediar entre la vista y el modelo.
 
 # Inicialización del Catálogo de libros
 
+
+def initCatalog():
+    """
+    Llama la función de inicialización del catálogo del model
+    """
+    catalog = model.newCatalog()
+
+    return catalog
+
+
 # Funciones para la carga de datos
+
+
+def loadData(catalog):
+    """
+    Carga los datos de los archivos y cargar los datos
+    """
+    loadArtists(catalog)
+    loadArtworks(catalog)
+
+
+def loadArtists(catalog):
+    """
+    Carga los artistas del archivo.
+    """
+    artistsfile = cf.data_dir + 'MoMA/Artists-utf8-small.csv'
+    input_file = csv.DictReader(open(artistsfile, encoding='utf-8'))
+    for artist in input_file:
+        model.addArtist(catalog, artist)
+
+
+def loadArtworks(catalog):
+    """
+    Carga las obras del archivo.
+    """
+    artworksfile = cf.data_dir + 'MoMA/Artworks-utf8-small.csv'
+    input_file = csv.DictReader(open(artworksfile, encoding='utf-8'))
+    for artwork in input_file:
+        model.addArtwork(catalog, artwork)
+
 
 # Funciones de ordenamiento
 

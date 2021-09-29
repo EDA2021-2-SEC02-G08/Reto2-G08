@@ -25,6 +25,7 @@ import sys
 import controller
 from DISClib.ADT import list as lt
 assert cf
+from DISClib.ADT import map as mp
 
 
 """
@@ -34,25 +35,47 @@ se hace la solicitud al controlador para ejecutar la
 operación solicitada
 """
 
+
+def initCatalog():
+    """
+    Inicializa el catalogo de libros
+    """
+    return controller.initCatalog()
+
+
+def loadData(catalog):
+    """
+    Carga los libros en la estructura de datos
+    """
+    controller.loadData(catalog)
+
+
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
     print("2- ")
 
+
 catalog = None
+
 
 """
 Menu principal
 """
 while True:
     printMenu()
-    inputs = input('Seleccione una opción para continuar\n')
-    if int(inputs[0]) == 1:
+    inputs = int(input('Seleccione una opción para continuar\n'))
+
+    if inputs == 1:
         print("Cargando información de los archivos ....")
-
-    elif int(inputs[0]) == 2:
+        catalog = initCatalog()
+        loadData(catalog)
+        print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
+        print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
+        print(mp.get(catalog['medium'], '710'))
+    elif inputs[0] == 2:
         pass
-
     else:
         sys.exit(0)
+
 sys.exit(0)
