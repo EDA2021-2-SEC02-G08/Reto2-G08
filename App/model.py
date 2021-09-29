@@ -43,6 +43,7 @@ def newCatalog():
 
     catalog = {'artists': None,
                'artworks': None,
+               'id_medium': None,
                'medium': None}
 
     catalog['artists'] = lt.newList('SINGLE_LINKED')
@@ -54,6 +55,16 @@ def newCatalog():
     Estos indices no replican informacion, solo la referencian.
     """
 
+    """
+    Indice para almacenar las técnicas por id_artist.
+    """
+    catalog['id_medium'] = mp.newMap(2000,
+                                     maptype='CHAINING',
+                                     loadfactor=3)
+
+    """
+    Indice para almacenar las obras por técnica.
+    """
     catalog['medium'] = mp.newMap(2000,
                                   maptype='CHAINING',
                                   loadfactor=3)
@@ -70,18 +81,21 @@ def addArtist(catalog, artist):
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
+    addMedium(catalog, artwork)
     artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
     artists_id = artists_id.split(', ')
 
     for id in artists_id:
-        addMedium(catalog, id, artwork)
+        addIdMedium(catalog, id, artwork)
 
 
-def addMedium(catalog, id, artwork):
+def addIdMedium(catalog, id, artwork):
     """
-    ...
+    Esta función crea la siguiente estructura de datos
+    por id_artist en catalog['medium]:
+    {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
-    exist_id = mp.contains(catalog['medium'], id)
+    exist_id = mp.contains(catalog['id_medium'], id)
     map = mp.newMap(3,
                     maptype='CHAINING',
                     loadfactor=3)
@@ -90,9 +104,9 @@ def addMedium(catalog, id, artwork):
     if exist_id:
         pass
     else:
-        mp.put(catalog['medium'], id, map)
+        mp.put(catalog['id_medium'], id, map)
 
-    id = mp.get(catalog['medium'], id)
+    id = mp.get(catalog['id_medium'], id)
     map = me.getValue(id)
     medium = artwork['Medium']
     exist_medium = mp.contains(map, medium)
@@ -107,8 +121,26 @@ def addMedium(catalog, id, artwork):
     lt.addLast(arrayList, artwork)
 
 
-# Funciones para creacion de datos
+def addMedium(catalog, artwork):
+    """
+    Esta función crea la siguiente estructura de datos:
+    {'key': 'medium', 'value':[artworks]}
+    """
+    medium = artwork['Medium']
+    exist_medium = mp.contains(catalog['medium'], medium)
+    arrayList = lt.newList('ARRAY_LIST')
 
+    if exist_medium:
+        pass
+    else:
+        mp.put(catalog['medium'], medium, arrayList)
+
+    pair = mp.get(catalog['medium'], medium)
+    arrayList = me.getValue(pair)
+    lt.addLast(arrayList, artwork)
+
+
+# Funciones para creacion de datos
 
 # Funciones de consulta
 

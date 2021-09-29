@@ -20,12 +20,13 @@
  * along withthis program.  If not, see <http://www.gnu.org/licenses/>.
  """
 
+
 import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
-assert cf
 from DISClib.ADT import map as mp
+assert cf
 
 
 """
@@ -72,7 +73,7 @@ while True:
         loadData(catalog)
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
-        print(mp.get(catalog['medium'], '710'))
+        print(mp.get(catalog['medium'], 'Gelatin silver print'))
     elif inputs[0] == 2:
         pass
     else:
