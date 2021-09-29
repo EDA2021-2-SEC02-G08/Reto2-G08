@@ -54,7 +54,7 @@ def loadData(catalog):
 def printMenu():
     print("Bienvenido")
     print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("2- Obtener las obras más antiguas de un medio o técnica")
 
 
 catalog = None
@@ -74,8 +74,12 @@ while True:
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
         print(mp.get(catalog['medium'], 'Gelatin silver print'))
-    elif inputs[0] == 2:
-        pass
+    elif inputs == 2:
+        medium = str(input('Ingrese la técnica a examinar: '))
+        N = int(input('Ingrese el número de obras a retornar: '))
+        artworks = controller.getOldestInMedium(catalog, N, medium)
+        for artwork in lt.iterator(artworks):
+            print('Nombre de la obra: ' + str(artwork['Title']) +'\tFecha de la obra: ' + str(artwork['Date']))
     else:
         sys.exit(0)
 

@@ -75,3 +75,6 @@ def loadArtworks(catalog):
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def getOldestInMedium(catalog, n, medium):
+    return model.getOldestInMedium(catalog, n, medium)

@@ -29,6 +29,7 @@ import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
+from DISClib.Algorithms.Sorting import mergesort as mg
 assert cf
 
 
@@ -144,7 +145,24 @@ def addMedium(catalog, artwork):
 
 # Funciones de consulta
 
+
+def getOldestInMedium (catalog, n, medium):
+    media_list = catalog['medium']
+    medium_exists = mp.contains(media_list, medium)
+    if medium_exists:
+        medium1 = mp.get(media_list, medium)
+        artworks = me.getValue(medium1)
+        sortArtworks(artworks)
+        return lt.subList(artworks, 1, n)
+    else:
+        pass
+
 # Funciones de comparación
+
+def compareArtworksByAge(artwork1, artwork2):
+    age1 = artwork1['Date']
+    age2 = artwork2['Date']
+    return int(age1) < int(age2)
 
 
 def compareMedium(medium, entry):
@@ -152,3 +170,6 @@ def compareMedium(medium, entry):
 
 
 # Funciones de ordenamiento
+
+def sortArtworks(artworks):
+    mg.sort(artworks, compareArtworksByAge)
