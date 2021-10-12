@@ -73,6 +73,12 @@ def newCatalog():
                                   loadfactor=3)
 
     """
+    Indice para almacenar la nacionalidad por ID.
+    """
+    catalog['constituentID'] = mp.newMap(2000,
+                                         maptype='CHAINING',
+                                         loadfactor=3)
+    """
     Indice para almacenar las obras por nacionalidad.
     """
     catalog['nationality'] = mp.newMap(2000,
@@ -82,12 +88,12 @@ def newCatalog():
     return catalog
 
 
-# Funciones para agregar informacion al catalogo
+# Agregar informacion al catalogo
 
 
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
-    addNationality(catalog, artist)
+    addID(catalog, artist)
 
 
 def addArtwork(catalog, artwork):
@@ -98,6 +104,10 @@ def addArtwork(catalog, artwork):
 
     for id in artists_id:
         addIdMedium(catalog, id, artwork)
+        addNationality(catalog, id, artwork)
+
+
+# Funciones para agregar informacion al catalogo
 
 
 def addIdMedium(catalog, id, artwork):
@@ -151,26 +161,38 @@ def addMedium(catalog, artwork):
     lt.addLast(arrayList, artwork)
 
 
-def addNationality(catalog, artist):
+def addID(catalog, artist):
     """
     Esta función crea la siguiente estructura de datos:
-    {'key': 'nationality', 'value':[constituentID]}
+    {'key': 'constituentID', 'value': 'nationality'}
     """
-    nationality = artist['Nationality']
-    exist_nationality = mp.contains(catalog['nationality'], nationality)
-    arrayList = lt.newList('ARRAY_LIST')
+    id = artist['ConstituentID']
+    id_exists = mp.contains(catalog['constituentID'], id)
 
-    if exist_nationality:
+    if id_exists:
         pass
     else:
+        mp.put(catalog['constituentID'], id, artist['Nationality'])
+
+
+def addNationality(catalog, id, artwork):
+    """
+    Esta función crea la siguiente estructura de datos:
+    {'key': 'nationality', 'value': [artworks]}
+    """
+    pair = mp.get(catalog['constituentID'], id)
+    nationality = me.getValue(pair)
+    nationality_exists = mp.contains(catalog['nationality'], nationality)
+
+    if nationality_exists:
+        pass
+    else:
+        arrayList = lt.newList('ARRAY_LIST')
         mp.put(catalog['nationality'], nationality, arrayList)
 
     pair = mp.get(catalog['nationality'], nationality)
     arrayList = me.getValue(pair)
-    lt.addLast(arrayList, artist['ConstituentID'])
-
-
-# Funciones para creacion de datos
+    lt.addLast(arrayList, artwork)
 
 
 # Funciones de consulta
