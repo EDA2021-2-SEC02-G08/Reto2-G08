@@ -73,13 +73,15 @@ while True:
         loadData(catalog)
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
-        print(mp.get(catalog['medium'], 'Gelatin silver print'))
+        mp.get(catalog['medium'], 'Gelatin silver print')
+        print(mp.get(catalog['nationality'], 'American'))
     elif inputs == 2:
         medium = str(input('Ingrese la técnica a examinar: '))
         N = int(input('Ingrese el número de obras a retornar: '))
         artworks = controller.getOldestInMedium(catalog, N, medium)
         for artwork in lt.iterator(artworks):
-            print('Nombre de la obra: ' + str(artwork['Title']) +'\tFecha de la obra: ' + str(artwork['Date']))
+            print('Nombre de la obra: ' + str(artwork['Title']) +
+                  '\tFecha de la obra: ' + str(artwork['Date']))
     else:
         sys.exit(0)
 

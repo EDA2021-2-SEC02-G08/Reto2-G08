@@ -44,8 +44,10 @@ def newCatalog():
 
     catalog = {'artists': None,
                'artworks': None,
+               'constituentID': None,
                'id_medium': None,
-               'medium': None}
+               'medium': None,
+               'nationality': None}
 
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
@@ -70,6 +72,13 @@ def newCatalog():
                                   maptype='CHAINING',
                                   loadfactor=3)
 
+    """
+    Indice para almacenar las obras por nacionalidad.
+    """
+    catalog['nationality'] = mp.newMap(2000,
+                                       maptype='CHAINING',
+                                       loadfactor=3)
+
     return catalog
 
 
@@ -78,6 +87,7 @@ def newCatalog():
 
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
+    addNationality(catalog, artist)
 
 
 def addArtwork(catalog, artwork):
@@ -141,12 +151,32 @@ def addMedium(catalog, artwork):
     lt.addLast(arrayList, artwork)
 
 
+def addNationality(catalog, artist):
+    """
+    Esta función crea la siguiente estructura de datos:
+    {'key': 'nationality', 'value':[constituentID]}
+    """
+    nationality = artist['Nationality']
+    exist_nationality = mp.contains(catalog['nationality'], nationality)
+    arrayList = lt.newList('ARRAY_LIST')
+
+    if exist_nationality:
+        pass
+    else:
+        mp.put(catalog['nationality'], nationality, arrayList)
+
+    pair = mp.get(catalog['nationality'], nationality)
+    arrayList = me.getValue(pair)
+    lt.addLast(arrayList, artist['ConstituentID'])
+
+
 # Funciones para creacion de datos
+
 
 # Funciones de consulta
 
 
-def getOldestInMedium (catalog, n, medium):
+def getOldestInMedium(catalog, n, medium):
     media_list = catalog['medium']
     medium_exists = mp.contains(media_list, medium)
     if medium_exists:
@@ -154,10 +184,10 @@ def getOldestInMedium (catalog, n, medium):
         artworks = me.getValue(medium1)
         sortArtworks(artworks)
         return lt.subList(artworks, 1, n)
-    else:
-        pass
+
 
 # Funciones de comparación
+
 
 def compareArtworksByAge(artwork1, artwork2):
     age1 = artwork1['Date']
