@@ -60,30 +60,36 @@ def newCatalog():
 
     """
     Indice para almacenar las técnicas por id_artist.
+    Factor de carga = N / M
+    0.75 = 16000 / 22000,
+    donde 16000 es el total de artistas en el csv large.
     """
-    catalog['id_medium'] = mp.newMap(2000,
+    catalog['id_medium'] = mp.newMap(22000,
                                      maptype='CHAINING',
-                                     loadfactor=3)
+                                     loadfactor=0.75)
 
     """
     Indice para almacenar las obras por técnica.
     """
-    catalog['medium'] = mp.newMap(2000,
-                                  maptype='CHAINING',
-                                  loadfactor=3)
+    catalog['medium'] = mp.newMap(1250,
+                                  maptype='PROBING',
+                                  loadfactor=0.8)
 
     """
     Indice para almacenar la nacionalidad por ID.
+    Factor de carga = N / M
+    0.75 = 16000 / 22000,
+    donde 16000 es el total de artistas en el csv large.
     """
-    catalog['constituentID'] = mp.newMap(2000,
+    catalog['constituentID'] = mp.newMap(22000,
                                          maptype='CHAINING',
-                                         loadfactor=3)
+                                         loadfactor=0.75)
     """
     Indice para almacenar las obras por nacionalidad.
     """
-    catalog['nationality'] = mp.newMap(2000,
-                                       maptype='CHAINING',
-                                       loadfactor=3)
+    catalog['nationality'] = mp.newMap(150,
+                                       maptype='PROBING',
+                                       loadfactor=0.8)
 
     return catalog
 
@@ -117,9 +123,9 @@ def addIdMedium(catalog, id, artwork):
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
     exist_id = mp.contains(catalog['id_medium'], id)
-    map = mp.newMap(3,
+    map = mp.newMap(7,
                     maptype='CHAINING',
-                    loadfactor=3)
+                    loadfactor=0.75)
     arrayList = lt.newList('ARRAY_LIST')
 
     if exist_id:

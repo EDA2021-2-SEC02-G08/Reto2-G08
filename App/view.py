@@ -21,13 +21,13 @@
  """
 
 
+import time as time
 import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 assert cf
-
 
 """
 La vista se encarga de la interacción con el usuario
@@ -69,12 +69,16 @@ while True:
 
     if inputs == 1:
         print("Cargando información de los archivos ....")
+        start_time = time.perf_counter()
         catalog = initCatalog()
         loadData(catalog)
+        stop_time = time.perf_counter()
+        delta_time = (stop_time - start_time) * 10000
+        print(delta_time)
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
         mp.get(catalog['medium'], 'Gelatin silver print')
-        print(mp.get(catalog['nationality'], 'American'))
+        mp.get(catalog['nationality'], 'American')
     elif inputs == 2:
         medium = str(input('Ingrese la técnica a examinar: '))
         N = int(input('Ingrese el número de obras a retornar: '))
