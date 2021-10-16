@@ -104,7 +104,6 @@ def addArtist(catalog, artist):
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
-    addMedium(catalog, artwork)
     artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
     artists_id = artists_id.split(', ')
 
@@ -145,25 +144,6 @@ def addIdMedium(catalog, id, artwork):
 
     medium = mp.get(map, medium)
     arrayList = me.getValue(medium)
-    lt.addLast(arrayList, artwork)
-
-
-def addMedium(catalog, artwork):
-    """
-    Esta función crea la siguiente estructura de datos:
-    {'key': 'medium', 'value':[artworks]}
-    """
-    medium = artwork['Medium']
-    exist_medium = mp.contains(catalog['medium'], medium)
-    arrayList = lt.newList('ARRAY_LIST')
-
-    if exist_medium:
-        pass
-    else:
-        mp.put(catalog['medium'], medium, arrayList)
-
-    pair = mp.get(catalog['medium'], medium)
-    arrayList = me.getValue(pair)
     lt.addLast(arrayList, artwork)
 
 
