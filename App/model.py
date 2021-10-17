@@ -272,16 +272,6 @@ def getDateAcquired(catalog, inicio, fin):
     return artworks
 
 
-def getOldestInMedium(catalog, n, medium):
-    media_list = catalog['medium']
-    medium_exists = mp.contains(media_list, medium)
-    if medium_exists:
-        medium1 = mp.get(media_list, medium)
-        artworks = me.getValue(medium1)
-        sortArtworks(artworks)
-        return lt.subList(artworks, 1, n)
-
-
 # Funciones de comparación
 
 
@@ -289,18 +279,8 @@ def cmpDateAcquired(date1, date2):
     return date.fromisoformat(date1) < date.fromisoformat(date2)
 
 
-def compareArtworksByAge(artwork1, artwork2):
-    age1 = artwork1['Date']
-    age2 = artwork2['Date']
-    return int(age1) < int(age2)
-
-
 # Funciones de ordenamiento
 
 
 def sortDateAcquired(arrayList):
     mg.sort(arrayList, cmpDateAcquired)
-
-
-def sortArtworks(artworks):
-    mg.sort(artworks, compareArtworksByAge)

@@ -79,7 +79,3 @@ def loadArtworks(catalog):
 
 def getDateAcquired(catalog, inicio, fin):
     return model.getDateAcquired(catalog, inicio, fin)
-
-
-def getOldestInMedium(catalog, n, medium):
-    return model.getOldestInMedium(catalog, n, medium)

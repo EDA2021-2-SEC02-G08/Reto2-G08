@@ -26,8 +26,8 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
-from DISClib.ADT import map as mp
 assert cf
+
 
 """
 La vista se encarga de la interacción con el usuario
@@ -51,10 +51,107 @@ def loadData(catalog):
     controller.loadData(catalog)
 
 
+# Funciones auxiliares
+
+
+def artistInfo(artists):
+    i = 1
+    while i <= 3:
+        artist = lt.getElement(artists, i)
+        print('Nombre: ' + artist['DisplayName'] +
+              '. Nacimiento: ' + artist['BeginDate'] +
+              '. Fallecimiento: ' + artist['EndDate'] +
+              '. Nacionalidad: ' + artist['Nationality'] +
+              '. Genero: ' + artist['Gender'])
+        i += 1
+
+    i = -2
+    while i <= 0:
+        artist = lt.getElement(artists, i)
+        print('Nombre: ' + artist['DisplayName'] +
+              '. Nacimiento: ' + artist['BeginDate'] +
+              '. Fallecimiento: ' + artist['EndDate'] +
+              '. Nacionalidad: ' + artist['Nationality'] +
+              '. Genero: ' + artist['Gender'])
+        i += 1
+
+
+def artworkInfo(artworks):
+    i = 1
+    while i <= 3:
+        artwork = lt.getElement(artworks, i)
+        print('Titulo: ' + artwork['Title'] +
+              '. Fecha: ' + artwork['Date'] +
+              '. Fecha de adquisicion: ' + artwork['DateAcquired'] +
+              '. Medio: ' + artwork['Medium'] +
+              '. Dimensiones: ' + artwork['Dimensions'])
+        i += 1
+
+    i = -2
+    while i <= 0:
+        artwork = lt.getElement(artworks, i)
+        print('Titulo: ' + artwork['Title'] +
+              '. Fecha: ' + artwork['Date'] +
+              '. Fecha de adquisicion ' + artwork['DateAcquired'] +
+              '. Medio: ' + artwork['Medium'] +
+              '. Dimensiones: ' + artwork['Dimensions'])
+        i += 1
+
+
+def countPurchase(artworks):
+    count = 0
+    for artwork in lt.iterator(artworks):
+        if 'purchase' in artwork['CreditLine'].lower():
+            count += 1
+
+    return count
+
+
+def countArtists(artworks):
+    auxiliar = {}
+    count = 0
+    for artwork in lt.iterator(artworks):
+        artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
+
+        if ',' in artists_id:
+            lista = artists_id.split(', ')
+            for artist in lista:
+                veces = auxiliar.get(artist, 0)
+                if veces == 0:
+                    auxiliar[artist] = 1
+                    count += 1
+        else:
+            veces = auxiliar.get(artists_id, 0)
+            if veces == 0:
+                auxiliar[artists_id] = 1
+                count += 1
+
+    return count
+
+
+# Funciones imprimir
+
+
+def printDateAcquired(result):
+    size = lt.size(result)
+    print('\nEl MoMA adquirió ' + str(size) + ' obras en este rango')
+    purchase = str(countPurchase(result))
+    artists = str(countArtists(result))
+    print('Con ' + artists + ' artistas distintos y ' +
+          purchase + ' de estas obras compradas.')
+    print('\nLas primeras y últimas obras de arte son:')
+    artworkInfo(result)
+
+
 def printMenu():
-    print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- Obtener las obras más antiguas de un medio o técnica")
+    print("\nBienvenido")
+    print('0- Cargar Datos')
+    print("1- Consultar los artistas segun su año de nacimiento")
+    print("2- Consultar las obras segun su fecha de adquisicion")
+    print("3- Consultar las obras de un artista por tecnica")
+    print("4- Consultar las obras por la nacionalidad de sus artistas")
+    print("5- Consultar el costo de transportar las obras")
+    print("0- Salir")
 
 
 catalog = None
@@ -67,7 +164,7 @@ while True:
     printMenu()
     inputs = int(input('Seleccione una opción para continuar\n'))
 
-    if inputs == 1:
+    if inputs == 0:
         print("Cargando información de los archivos ....")
         start_time = time.perf_counter()
         catalog = initCatalog()
@@ -77,15 +174,26 @@ while True:
         print(delta_time)
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
-        result = controller.getDateAcquired(catalog, '1993-01-01', '2000-01-01')
-        print(result)
+
+    elif inputs == 1:
+        inicio = int(input('Ingrese el año inicial: '))
+        fin = int(input('Ingrese el año final: '))
+
     elif inputs == 2:
-        medium = str(input('Ingrese la técnica a examinar: '))
-        N = int(input('Ingrese el número de obras a retornar: '))
-        artworks = controller.getOldestInMedium(catalog, N, medium)
-        for artwork in lt.iterator(artworks):
-            print('Nombre de la obra: ' + str(artwork['Title']) +
-                  '\tFecha de la obra: ' + str(artwork['Date']))
+        inicio = str(input('Ingrese la fecha inicial (AAAA-MM-DD): '))
+        fin = str(input('Ingrese la fecha final (AAAA-MM-DD): '))
+        result = controller.getDateAcquired(catalog, inicio, fin)
+        printDateAcquired(result)
+
+    elif inputs == 3:
+        pass
+
+    elif inputs == 4:
+        pass
+
+    elif inputs == 5:
+        pass
+
     else:
         sys.exit(0)
 
