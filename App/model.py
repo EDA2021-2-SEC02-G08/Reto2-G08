@@ -69,27 +69,21 @@ def newCatalog():
                                      loadfactor=0.75)
 
     """
-    Indice para almacenar las obras por técnica.
-    """
-    catalog['medium'] = mp.newMap(1250,
-                                  maptype='PROBING',
-                                  loadfactor=0.8)
-
-    """
     Indice para almacenar la nacionalidad por ID.
-    Factor de carga = N / M
-    0.75 = 16000 / 22000,
-    donde 16000 es el total de artistas en el csv large.
     """
     catalog['constituentID'] = mp.newMap(22000,
                                          maptype='CHAINING',
                                          loadfactor=0.75)
+
     """
     Indice para almacenar las obras por nacionalidad.
+    Factor de carga = N / M
+    0.75 = 120 / 160,
+    donde 120 es el total de nacionalidades en el csv large.
     """
-    catalog['nationality'] = mp.newMap(150,
+    catalog['nationality'] = mp.newMap(160,
                                        maptype='PROBING',
-                                       loadfactor=0.8)
+                                       loadfactor=0.75)
 
     return catalog
 
@@ -122,7 +116,7 @@ def addIdMedium(catalog, id, artwork):
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
     exist_id = mp.contains(catalog['id_medium'], id)
-    map = mp.newMap(7,
+    map = mp.newMap(20,
                     maptype='CHAINING',
                     loadfactor=0.75)
     arrayList = lt.newList('ARRAY_LIST')
