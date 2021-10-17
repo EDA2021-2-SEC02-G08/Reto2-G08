@@ -46,14 +46,12 @@ def newCatalog():
     catalog = {'artists': None,
                'artworks': None,
                'constituentID': None,
-               'dateAcquired_list': None,
                'dateAcquired': None,
                'id_medium': None,
                'nationality': None}
 
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
-    catalog['dateAcquired_list'] = lt.newList('ARRAY_LIST')
 
     """
     A continuacion se crean indices por diferentes criterios
@@ -112,7 +110,6 @@ def addArtist(catalog, artist):
 def addArtwork(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
     addDateAcquired(catalog, artwork)
-    dates(catalog, artwork)
     artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
     artists_id = artists_id.split(', ')
 
@@ -144,17 +141,19 @@ def addDateAcquired(catalog, artwork):
     {'key': dateAcquired, 'value': [artworks]}
     """
     dateAcquired = artwork['DateAcquired']
-    exist_date = mp.contains(catalog['dateAcquired'], dateAcquired)
-    arrayList = lt.newList('ARRAY_LIST')
 
-    if exist_date:
-        pass
-    else:
-        mp.put(catalog['dateAcquired'], dateAcquired, arrayList)
+    if dateAcquired != '':
+        exist_date = mp.contains(catalog['dateAcquired'], dateAcquired)
+        arrayList = lt.newList('ARRAY_LIST')
 
-    pair = mp.get(catalog['dateAcquired'], dateAcquired)
-    arrayList = me.getValue(pair)
-    lt.addLast(arrayList, artwork)
+        if exist_date:
+            pass
+        else:
+            mp.put(catalog['dateAcquired'], dateAcquired, arrayList)
+
+        pair = mp.get(catalog['dateAcquired'], dateAcquired)
+        arrayList = me.getValue(pair)
+        lt.addLast(arrayList, artwork)
 
 
 def addIdMedium(catalog, id, artwork):
@@ -209,26 +208,6 @@ def addNationality(catalog, id, artwork):
     lt.addLast(arrayList, artwork)
 
 
-# Funciones auxiliares
-
-
-auxiliar = {}
-
-
-def dates(catalog, artwork):
-    """
-    Crea una arrayList con todas las fechas de adqusición.
-    """
-    arrayList = catalog['dateAcquired_list']
-    dateAcquired = artwork['DateAcquired']
-    if dateAcquired != '':
-        if dateAcquired in auxiliar.keys():
-            pass
-        else:
-            lt.addLast(arrayList, dateAcquired)
-            auxiliar[dateAcquired] = 0
-
-
 # Funciones de busqueda
 
 
@@ -255,7 +234,8 @@ def busquedabinaria(arrayList, element):
 
 
 def getDateAcquired(catalog, inicio, fin):
-    arrayList = catalog['dateAcquired_list']
+
+    arrayList = mp.keySet(catalog['dateAcquired'])
     sortDateAcquired(arrayList)
     pos_inicio = busquedabinaria(arrayList, inicio)
     pos_fin = busquedabinaria(arrayList, fin)
