@@ -77,8 +77,8 @@ while True:
         print(delta_time)
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
-        mp.get(catalog['medium'], 'Gelatin silver print')
-        mp.get(catalog['nationality'], 'American')
+        result = controller.getDateAcquired(catalog, '1993-01-01', '2000-01-01')
+        print(result)
     elif inputs == 2:
         medium = str(input('Ingrese la técnica a examinar: '))
         N = int(input('Ingrese el número de obras a retornar: '))

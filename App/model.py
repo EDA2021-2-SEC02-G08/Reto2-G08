@@ -26,6 +26,7 @@
 
 
 import config as cf
+from datetime import date
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -45,18 +46,30 @@ def newCatalog():
     catalog = {'artists': None,
                'artworks': None,
                'constituentID': None,
+               'dateAcquired_list': None,
+               'dateAcquired': None,
                'id_medium': None,
-               'medium': None,
                'nationality': None}
 
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
+    catalog['dateAcquired_list'] = lt.newList('ARRAY_LIST')
 
     """
     A continuacion se crean indices por diferentes criterios
     para llegar a la informacion consultada.
     Estos indices no replican informacion, solo la referencian.
     """
+
+    """
+    Indice para almacenar las obras por fecha de adquisición.
+    Factor de carga = N / M
+    0.75 = 72000 / 96000,
+    donde 72000 es el total de fechas de adquisición en el csv large.
+    """
+    catalog['dateAcquired'] = mp.newMap(96000,
+                                        maptype='CHAINING',
+                                        loadfactor=0.75)
 
     """
     Indice para almacenar las técnicas por id_artist.
@@ -98,6 +111,8 @@ def addArtist(catalog, artist):
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
+    addDateAcquired(catalog, artwork)
+    dates(catalog, artwork)
     artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
     artists_id = artists_id.split(', ')
 
@@ -107,6 +122,39 @@ def addArtwork(catalog, artwork):
 
 
 # Funciones para agregar informacion al catalogo
+
+
+def addID(catalog, artist):
+    """
+    Esta función crea la siguiente estructura de datos:
+    {'key': 'constituentID', 'value': 'nationality'}
+    """
+    id = artist['ConstituentID']
+    id_exists = mp.contains(catalog['constituentID'], id)
+
+    if id_exists:
+        pass
+    else:
+        mp.put(catalog['constituentID'], id, artist['Nationality'])
+
+
+def addDateAcquired(catalog, artwork):
+    """
+    Esta función crea la siguiente estructura de datos:
+    {'key': dateAcquired, 'value': [artworks]}
+    """
+    dateAcquired = artwork['DateAcquired']
+    exist_date = mp.contains(catalog['dateAcquired'], dateAcquired)
+    arrayList = lt.newList('ARRAY_LIST')
+
+    if exist_date:
+        pass
+    else:
+        mp.put(catalog['dateAcquired'], dateAcquired, arrayList)
+
+    pair = mp.get(catalog['dateAcquired'], dateAcquired)
+    arrayList = me.getValue(pair)
+    lt.addLast(arrayList, artwork)
 
 
 def addIdMedium(catalog, id, artwork):
@@ -141,20 +189,6 @@ def addIdMedium(catalog, id, artwork):
     lt.addLast(arrayList, artwork)
 
 
-def addID(catalog, artist):
-    """
-    Esta función crea la siguiente estructura de datos:
-    {'key': 'constituentID', 'value': 'nationality'}
-    """
-    id = artist['ConstituentID']
-    id_exists = mp.contains(catalog['constituentID'], id)
-
-    if id_exists:
-        pass
-    else:
-        mp.put(catalog['constituentID'], id, artist['Nationality'])
-
-
 def addNationality(catalog, id, artwork):
     """
     Esta función crea la siguiente estructura de datos:
@@ -175,7 +209,67 @@ def addNationality(catalog, id, artwork):
     lt.addLast(arrayList, artwork)
 
 
+# Funciones auxiliares
+
+
+auxiliar = {}
+
+
+def dates(catalog, artwork):
+    """
+    Crea una arrayList con todas las fechas de adqusición.
+    """
+    arrayList = catalog['dateAcquired_list']
+    dateAcquired = artwork['DateAcquired']
+    if dateAcquired != '':
+        if dateAcquired in auxiliar.keys():
+            pass
+        else:
+            lt.addLast(arrayList, dateAcquired)
+            auxiliar[dateAcquired] = 0
+
+
+# Funciones de busqueda
+
+
+def busquedabinaria(arrayList, element):
+    low = 0
+    high = lt.size(arrayList) - 1
+    mid = 0
+    element = date.fromisoformat(element)
+
+    while low <= high:
+        mid = (high + low) // 2
+        cmp = lt.getElement(arrayList, mid)
+        if date.fromisoformat(cmp) < element:
+            low = mid + 1
+        elif date.fromisoformat(cmp) > element:
+            high = mid - 1
+        else:
+            return mid
+
+    return mid
+
+
 # Funciones de consulta
+
+
+def getDateAcquired(catalog, inicio, fin):
+    arrayList = catalog['dateAcquired_list']
+    sortDateAcquired(arrayList)
+    pos_inicio = busquedabinaria(arrayList, inicio)
+    pos_fin = busquedabinaria(arrayList, fin)
+    n = pos_fin - pos_inicio
+    subList = lt.subList(arrayList, pos_inicio, n)
+    artworks = lt.newList('ARRAY_LIST')
+
+    for element in lt.iterator(subList):
+        pair = mp.get(catalog['dateAcquired'], element)
+        value = me.getValue(pair)
+        for element in lt.iterator(value):
+            lt.addLast(artworks, element)
+
+    return artworks
 
 
 def getOldestInMedium(catalog, n, medium):
@@ -191,17 +285,22 @@ def getOldestInMedium(catalog, n, medium):
 # Funciones de comparación
 
 
+def cmpDateAcquired(date1, date2):
+    return date.fromisoformat(date1) < date.fromisoformat(date2)
+
+
 def compareArtworksByAge(artwork1, artwork2):
     age1 = artwork1['Date']
     age2 = artwork2['Date']
     return int(age1) < int(age2)
 
 
-def compareMedium(medium, entry):
-    pass
-
-
 # Funciones de ordenamiento
+
+
+def sortDateAcquired(arrayList):
+    mg.sort(arrayList, cmpDateAcquired)
+
 
 def sortArtworks(artworks):
     mg.sort(artworks, compareArtworksByAge)
