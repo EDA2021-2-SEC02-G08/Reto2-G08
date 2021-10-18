@@ -189,7 +189,8 @@ while True:
         pass
 
     elif inputs == 4:
-        pass
+        result = controller.getTopNactionalities(catalog)
+        print(result)
 
     elif inputs == 5:
         pass

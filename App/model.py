@@ -234,7 +234,10 @@ def busquedabinaria(arrayList, element):
 
 
 def getDateAcquired(catalog, inicio, fin):
-
+    """
+    Retorna un arrayList con las obras de arte
+    en un rango de fechas de adquisición.
+    """
     arrayList = mp.keySet(catalog['dateAcquired'])
     sortDateAcquired(arrayList)
     pos_inicio = busquedabinaria(arrayList, inicio)
@@ -250,6 +253,24 @@ def getDateAcquired(catalog, inicio, fin):
             lt.addLast(artworks, element)
 
     return artworks
+
+
+def getTopNactionalities(catalog):
+    """
+    Retorna el TOP 10 de nacionalidades por obras.
+    Retorna un arrayList con todas las obras de la
+    nacionalidad más recurrente en el MoMA.
+    """
+    auxiliar = {}
+    nationalities = mp.keySet(catalog['nationality'])
+
+    for nationality in lt.iterator(nationalities):
+        if nationality != 'Nationality unknown':
+            pair = mp.get(catalog['nationality'], nationality)
+            value = me.getValue(pair)
+            auxiliar[nationality] = lt.size(value)
+
+    return auxiliar
 
 
 # Funciones de comparación

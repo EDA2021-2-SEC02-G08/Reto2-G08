@@ -72,10 +72,12 @@ def loadArtworks(catalog):
         model.addArtwork(catalog, artwork)
 
 
-# Funciones de ordenamiento
-
 # Funciones de consulta sobre el catálogo
 
 
 def getDateAcquired(catalog, inicio, fin):
     return model.getDateAcquired(catalog, inicio, fin)
+
+
+def getTopNactionalities(catalog):
+    return model.getTopNactionalities(catalog)
