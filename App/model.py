@@ -27,6 +27,7 @@
 
 import config as cf
 from datetime import date
+from itertools import islice
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -62,10 +63,10 @@ def newCatalog():
     """
     Indice para almacenar las obras por fecha de adquisición.
     Factor de carga = N / M
-    0.75 = 72000 / 96000,
-    donde 72000 es el total de fechas de adquisición en el csv large.
+    0.75 = 425 / 570,
+    donde 350 es el total de fechas de adquisición en el csv large.
     """
-    catalog['dateAcquired'] = mp.newMap(96000,
+    catalog['dateAcquired'] = mp.newMap(570,
                                         maptype='CHAINING',
                                         loadfactor=0.75)
 
@@ -163,7 +164,7 @@ def addIdMedium(catalog, id, artwork):
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
     exist_id = mp.contains(catalog['id_medium'], id)
-    map = mp.newMap(20,
+    map = mp.newMap(30000,
                     maptype='CHAINING',
                     loadfactor=0.75)
     arrayList = lt.newList('ARRAY_LIST')
@@ -206,6 +207,15 @@ def addNationality(catalog, id, artwork):
     pair = mp.get(catalog['nationality'], nationality)
     arrayList = me.getValue(pair)
     lt.addLast(arrayList, artwork)
+
+
+# Funciones auxiliares
+
+
+def take(n, iterable):
+    "Return first n items of the iterable as a list"
+
+    return list(islice(iterable, n))
 
 
 # Funciones de busqueda
@@ -266,11 +276,19 @@ def getTopNactionalities(catalog):
 
     for nationality in lt.iterator(nationalities):
         if nationality != 'Nationality unknown':
-            pair = mp.get(catalog['nationality'], nationality)
-            value = me.getValue(pair)
-            auxiliar[nationality] = lt.size(value)
+            if nationality != '':
+                pair = mp.get(catalog['nationality'], nationality)
+                value = me.getValue(pair)
+                auxiliar[nationality] = lt.size(value)
 
-    return auxiliar
+    auxiliar_sorted = dict(sorted(auxiliar.items(), key=lambda item: item[1],
+                           reverse=True))
+    top10 = take(10, auxiliar_sorted.items())
+    top1 = take(1, auxiliar_sorted.items())
+    pair = mp.get(catalog['nationality'], top1[0][0])
+    arrayList = me.getValue(pair)
+
+    return top10, arrayList
 
 
 # Funciones de comparación

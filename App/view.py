@@ -80,7 +80,8 @@ def artworkInfo(artworks):
     i = 1
     while i <= 3:
         artwork = lt.getElement(artworks, i)
-        print('Titulo: ' + artwork['Title'] +
+        print('Object ID: ' + artwork['ObjectID'] +
+              '.Titulo: ' + artwork['Title'] +
               '. Fecha: ' + artwork['Date'] +
               '. Fecha de adquisicion: ' + artwork['DateAcquired'] +
               '. Medio: ' + artwork['Medium'] +
@@ -90,7 +91,8 @@ def artworkInfo(artworks):
     i = -2
     while i <= 0:
         artwork = lt.getElement(artworks, i)
-        print('Titulo: ' + artwork['Title'] +
+        print('Object ID: ' + artwork['ObjectID'] +
+              '.Titulo: ' + artwork['Title'] +
               '. Fecha: ' + artwork['Date'] +
               '. Fecha de adquisicion ' + artwork['DateAcquired'] +
               '. Medio: ' + artwork['Medium'] +
@@ -143,6 +145,21 @@ def printDateAcquired(result):
     artworkInfo(result)
 
 
+def printNationality(result):
+    top10 = result[0]
+    top1 = result[1]
+    print('\nEl TOP 10 de nacionalidad en el MoMA es:')
+
+    for top in top10:
+        print(top)
+
+    print('\nEl TOP de nacionalidad en el MoMA es: ' + str(top10[0][0]) +
+          ' con ' + str(top10[0][1]) + ' obras de arte.')
+    print('\nLos primeros y ultimo tres en la lista de obras ' +
+          str(top10[0][0]) + ' son:')
+    artworkInfo(top1)
+
+
 def printMenu():
     print("\nBienvenido")
     print('0- Cargar Datos')
@@ -190,7 +207,7 @@ while True:
 
     elif inputs == 4:
         result = controller.getTopNactionalities(catalog)
-        print(result)
+        printNationality(result)
 
     elif inputs == 5:
         pass
