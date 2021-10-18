@@ -134,7 +134,7 @@ def countArtists(artworks):
 
 def printDateAcquired(result):
     size = lt.size(result)
-    print('\nEl MoMA adquirió ' + str(size) + ' obras en este rango')
+    print('\nEl MoMA adquirió ' + str(size) + ' obras en este rango de tiempo')
     purchase = str(countPurchase(result))
     artists = str(countArtists(result))
     print('Con ' + artists + ' artistas distintos y ' +
