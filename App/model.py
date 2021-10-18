@@ -164,7 +164,7 @@ def addIdMedium(catalog, id, artwork):
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
     exist_id = mp.contains(catalog['id_medium'], id)
-    map = mp.newMap(30000,
+    map = mp.newMap(70,
                     maptype='CHAINING',
                     loadfactor=0.75)
     arrayList = lt.newList('ARRAY_LIST')

@@ -156,7 +156,7 @@ def printNationality(result):
     print('\nEl TOP de nacionalidad en el MoMA es: ' + str(top10[0][0]) +
           ' con ' + str(top10[0][1]) + ' obras de arte.')
     print('\nLos primeros y ultimo tres en la lista de obras ' +
-          str(top10[0][0]) + ' son:')
+          str(top10[0][0]) + ' son:\n')
     artworkInfo(top1)
 
 
