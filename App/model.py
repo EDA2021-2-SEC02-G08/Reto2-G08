@@ -160,7 +160,7 @@ def addDateAcquired(catalog, artwork):
 def addIdMedium(catalog, id, artwork):
     """
     Esta función crea la siguiente estructura de datos
-    por id_artist en catalog['medium]:
+    por id_artist en catalog['medium']:
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
     exist_id = mp.contains(catalog['id_medium'], id)
@@ -239,9 +239,45 @@ def busquedabinaria(arrayList, element):
 
     return mid
 
+def YearBinarySearch(catalog, element):
+    """
+    Retorna la posición de un elemento en una lista organizada.
+    Esta función encuentra el año de nacimiento del artista.
+    En caso de no existir, retorna la última posición encontrada.
+    """
+    low = 0
+    high = lt.size(catalog) - 1
+    mid = 0
+
+    while low <= high:
+        mid = (high + low) // 2
+        cmp = lt.getElement(catalog, mid)
+        if int(cmp['BeginDate']) < element:
+            low = mid + 1
+        elif int(cmp['BeginDate']) > element:
+            high = mid - 1
+        else:
+            return mid
+
+    return mid
 
 # Funciones de consulta
 
+def getArtists(catalog, inicio, fin):
+    """
+    Retorna un arrayList con los artistas
+    en un rango de tiempo.
+    """
+    artists = catalog['artists']
+    pos_inicio = YearBinarySearch(artists, inicio)
+    pos_fin = YearBinarySearch(artists, fin)
+    arrayList = lt.newList(datastructure='ARRAY_LIST')
+
+    for pos in range(pos_inicio, pos_fin + 1):
+        artist = lt.getElement(artists, pos)
+        lt.addLast(arrayList, artist)
+
+    return arrayList
 
 def getDateAcquired(catalog, inicio, fin):
     """
