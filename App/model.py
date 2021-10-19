@@ -51,7 +51,7 @@ def newCatalog():
                'id_medium': None,
                'nationality': None}
 
-    catalog['artists'] = lt.newList('SINGLE_LINKED')
+    catalog['artists'] = lt.newList('ARRAY_LIST')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
 
     """
@@ -263,7 +263,7 @@ def YearBinarySearch(catalog, element):
 
 # Funciones de consulta
 
-def getArtists(catalog, inicio, fin):
+def getArtistsInRange(catalog, inicio, fin):
     """
     Retorna un arrayList con los artistas
     en un rango de tiempo.
@@ -271,13 +271,10 @@ def getArtists(catalog, inicio, fin):
     artists = catalog['artists']
     pos_inicio = YearBinarySearch(artists, inicio)
     pos_fin = YearBinarySearch(artists, fin)
-    arrayList = lt.newList(datastructure='ARRAY_LIST')
+    n = pos_fin-pos_inicio
+    sublist = lt.subList(artists, pos_inicio, n)
 
-    for pos in range(pos_inicio, pos_fin + 1):
-        artist = lt.getElement(artists, pos)
-        lt.addLast(arrayList, artist)
-
-    return arrayList
+    return sublist
 
 def getDateAcquired(catalog, inicio, fin):
     """
@@ -333,9 +330,19 @@ def getTopNactionalities(catalog):
 def cmpDateAcquired(date1, date2):
     return date.fromisoformat(date1) < date.fromisoformat(date2)
 
+def cmpBeginDate(artist1, artist2):
+    """
+    Retorna True si el 'BeginDate' de artist1
+    es menor que el de artist2.
+    """
+    return int(artist1['BeginDate']) < int(artist2['BeginDate'])
+
 
 # Funciones de ordenamiento
 
 
 def sortDateAcquired(arrayList):
     mg.sort(arrayList, cmpDateAcquired)
+
+def sortBeginDate(catalog):
+    mg.sort(catalog['artists'], cmpBeginDate)

@@ -133,6 +133,34 @@ def countArtists(artworks):
 
 # Funciones imprimir
 
+def printArtistInfo (artist):
+    name = artist['DisplayName']
+    YOB = artist['BeginDate']
+    YOD = artist['EndDate']
+    nationality = artist['Nationality']
+    gender = artist['Gender']
+    print('Nombre: ' + name + '. Año de nacimiento: ' + YOB 
+           + '. Año de fallecimiento: ' + YOD + '. Nacionalidad: ' + nationality
+           + '. Género: ' + gender)
+
+
+def printArtistsInRange(result):
+    size = lt.size(result)
+    print ('\nHay ' + str(size) + 'artistas nacidos en este rango de tiempo.')
+    if size > 6:
+        print('Los artistas encontrados fueron:')
+        for artist in lt.iterator(result):
+            printArtistInfo(artist)
+    else:
+        print('Los primeros y últimos tres artistas encontrados fueron:')
+        first = lt.subList(result, 1, 3)
+        last = lt.subList(result, size-3, 3)
+        for artist in lt.iterator(first):
+            printArtistInfo(artist)
+
+        for artist in lt.iterator(first):
+            printArtistInfo(artist)
+
 
 def printDateAcquired(result):
     size = lt.size(result)
@@ -186,6 +214,7 @@ while True:
         start_time = time.perf_counter()
         catalog = initCatalog()
         loadData(catalog)
+        controller.sortBeginDate(catalog)
         stop_time = time.perf_counter()
         delta_time = (stop_time - start_time) * 10000
         print(delta_time)
@@ -195,6 +224,8 @@ while True:
     elif inputs == 1:
         inicio = int(input('Ingrese el año inicial: '))
         fin = int(input('Ingrese el año final: '))
+        result = controller.getArtistsInRange(catalog, inicio, fin)
+        printArtistsInRange(result)
 
     elif inputs == 2:
         inicio = str(input('Ingrese la fecha inicial (AAAA-MM-DD): '))

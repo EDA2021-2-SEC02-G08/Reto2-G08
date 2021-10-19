@@ -71,8 +71,15 @@ def loadArtworks(catalog):
     for artwork in input_file:
         model.addArtwork(catalog, artwork)
 
+# Funciones de ordenamiento
+
+def sortBeginDate(catalog):
+    return model.sortBeginDate(catalog)
 
 # Funciones de consulta sobre el catálogo
+
+def getArtistsInRange(catalog, inicio, fin):
+    return model.getArtistsInRange(catalog, inicio, fin)
 
 
 def getDateAcquired(catalog, inicio, fin):
