@@ -49,7 +49,8 @@ def newCatalog():
                'constituentID': None,
                'dateAcquired': None,
                'id_medium': None,
-               'nationality': None}
+               'nationality': None,
+               'department': None}
 
     catalog['artists'] = lt.newList('SINGLE_LINKED')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
@@ -97,6 +98,16 @@ def newCatalog():
                                        maptype='PROBING',
                                        loadfactor=0.75)
 
+    """
+    Indice para almacenar las obras por departamento.
+    Factor de carga = N / M
+    0.75 = 9 / 12,
+    donde 12 es el total de departamentos en el csv large.
+    """
+    catalog['department'] = mp.newMap(12,
+                                      maptype='PROBING',
+                                      loadfactor=0.75)
+
     return catalog
 
 
@@ -111,6 +122,7 @@ def addArtist(catalog, artist):
 def addArtwork(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
     addDateAcquired(catalog, artwork)
+    addDepartment(catalog, artwork)
     artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
     artists_id = artists_id.split(', ')
 
@@ -145,11 +157,11 @@ def addDateAcquired(catalog, artwork):
 
     if dateAcquired != '':
         exist_date = mp.contains(catalog['dateAcquired'], dateAcquired)
-        arrayList = lt.newList('ARRAY_LIST')
 
         if exist_date:
             pass
         else:
+            arrayList = lt.newList('ARRAY_LIST')
             mp.put(catalog['dateAcquired'], dateAcquired, arrayList)
 
         pair = mp.get(catalog['dateAcquired'], dateAcquired)
@@ -205,6 +217,27 @@ def addNationality(catalog, id, artwork):
         mp.put(catalog['nationality'], nationality, arrayList)
 
     pair = mp.get(catalog['nationality'], nationality)
+    arrayList = me.getValue(pair)
+    lt.addLast(arrayList, artwork)
+
+
+def addDepartment(catalog, artwork):
+    """
+    Esta función crea la siguiente estructura de datos:
+    {'key': 'department', 'value': [artworks]}
+    """
+    department = artwork['Department']
+
+    if department != '':
+        exist_department = mp.contains(catalog['department'], department)
+
+        if exist_department:
+            pass
+        else:
+            arrayList = lt.newList('ARRAY_LIST')
+            mp.put(catalog['department'], department, arrayList)
+
+    pair = mp.get(catalog['department'], department)
     arrayList = me.getValue(pair)
     lt.addLast(arrayList, artwork)
 

@@ -26,6 +26,7 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
 assert cf
 
 
@@ -207,7 +208,8 @@ while True:
 
     elif inputs == 4:
         result = controller.getTopNactionalities(catalog)
-        printNationality(result)
+        # printNationality(result)
+        print(mp.get(catalog['department'], 'Drawings & Prints'))
 
     elif inputs == 5:
         pass
