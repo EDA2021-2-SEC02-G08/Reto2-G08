@@ -54,28 +54,6 @@ def loadData(catalog):
 # Funciones auxiliares
 
 
-def artistInfo(artists):
-    i = 1
-    while i <= 3:
-        artist = lt.getElement(artists, i)
-        print('Nombre: ' + artist['DisplayName'] +
-              '. Nacimiento: ' + artist['BeginDate'] +
-              '. Fallecimiento: ' + artist['EndDate'] +
-              '. Nacionalidad: ' + artist['Nationality'] +
-              '. Genero: ' + artist['Gender'])
-        i += 1
-
-    i = -2
-    while i <= 0:
-        artist = lt.getElement(artists, i)
-        print('Nombre: ' + artist['DisplayName'] +
-              '. Nacimiento: ' + artist['BeginDate'] +
-              '. Fallecimiento: ' + artist['EndDate'] +
-              '. Nacionalidad: ' + artist['Nationality'] +
-              '. Genero: ' + artist['Gender'])
-        i += 1
-
-
 def artworkInfo(artworks):
     i = 1
     while i <= 3:
@@ -147,7 +125,7 @@ def printArtistInfo (artist):
 def printArtistsInRange(result):
     size = lt.size(result)
     print ('\nHay ' + str(size) + ' artistas nacidos en este rango de tiempo.')
-    if size < 6:
+    if size <= 6:
         print('Los artistas encontrados fueron:')
         for artist in lt.iterator(result):
             printArtistInfo(artist)
@@ -197,11 +175,24 @@ def printDepartment(result, search):
     print('El costo estimado de transporte (USD): ' + str(result[0]))
 
 
-# Menu
 def printArtworkInfo(artwork):
     print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
                 ' Medio: ' + artwork['Medium'] +
                 ' Dimensiones: ' + artwork['Dimensions'])
+
+
+def printArtworkInfoWithDate(artwork):
+    print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] + 
+                ' Fecha de adquisición: ' + artwork['DateAcquired'] +
+                ' Medio: ' + artwork['Medium'] +
+                ' Dimensiones: ' + artwork['Dimensions'])
+
+
+def printArtworkInfoWithCost(artwork):
+    print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
+                ' Medio: ' + artwork['Medium'] +
+                ' Dimensiones: ' + artwork['Dimensions'] + ' Costo (USD): ' +
+                str(artwork['TransCost (USD)']))
 
 
 def printTechniques(result):
@@ -209,9 +200,7 @@ def printTechniques(result):
     if size < 6:
         print('Las obras con esta técnica son:')
         for artwork in lt.iterator(result):
-            print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
-                ' Medio: ' + artwork['Medium'] +
-                ' Dimensiones: ' + artwork['Dimensions'])
+            printArtworkInfo(artwork)
     else:
         first = lt.subList(result, 1, 3)
         last = lt.subList(result, size-3, 3)
@@ -220,6 +209,8 @@ def printTechniques(result):
 
         for artwork in lt.iterator(last):
             printArtworkInfo(artwork)
+
+# Menu
 
 
 def printMenu():
@@ -251,7 +242,7 @@ while True:
         controller.sortBeginDate(catalog)
         controller.sortDateAcquired(catalog)
         stop_time = time.perf_counter()
-        delta_time = (stop_time - start_time) * 10000
+        delta_time = (stop_time - start_time) * 1000
         print(delta_time)
         print('Artistas cargados: ' + str(lt.size(catalog['artists'])))
         print('Obras cargadas: ' + str(lt.size(catalog['artworks'])))
@@ -286,6 +277,21 @@ while True:
         search = str(input('Ingrese el departamento del MoMA: '))
         result = controller.getCost(catalog, search)
         printDepartment(result, search)
+
+        artworks = result[2]
+        sorted = controller.sortExpensive(artworks)
+        mostExpensive = lt.subList(sorted, 1, 5)
+        sorted = controller.sortOldest(artworks)
+        oldest = lt.subList(sorted, 1, 5)
+        print('\nLos 5 objetos más costosos de transportar son:')
+        for artwork in lt.iterator(mostExpensive):
+            printArtworkInfoWithCost(artwork)
+
+        print('\nLos 5 objetos más antiguos a transportar son:')
+        for artwork in lt.iterator(oldest):
+            printArtworkInfoWithCost(artwork)
+
+
 
     else:
         sys.exit(0)

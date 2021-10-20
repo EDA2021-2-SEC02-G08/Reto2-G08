@@ -80,6 +80,15 @@ def sortBeginDate(catalog):
 def sortDateAcquired(catalog):
     return model.sortDateAcquired(catalog)
 
+
+def sortOldest(lst):
+    return model.sortOldest(lst)
+
+
+def sortExpensive(lst):
+    return model.sortExpensive(lst)
+
+
 # Funciones de consulta sobre el catálogo
 
 def getArtistsInRange(catalog, inicio, fin):

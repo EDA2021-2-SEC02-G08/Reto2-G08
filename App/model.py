@@ -360,6 +360,43 @@ def getDateAcquired(catalog, inicio, fin):
     return sublist
 
 
+def getArtistID (catalog, artistname):
+    names = catalog['ArtistNames']
+    exists = mp.contains(names, artistname)
+    if exists:
+        pair = mp.get(names, artistname)
+        id = me.getValue(pair)
+        return id
+    return None
+
+
+def getMedia(catalog, artist):
+    IDs = catalog['ID-Media']
+    id = getArtistID(catalog, artist)
+    if id is not None:
+        pair = mp.get(IDs, id)
+        media_map = me.getValue(pair)
+        media = mp.keySet(media_map)
+        N_media = lt.size(media)
+        N_artworks = 0
+        top_artworks = None
+        top_medium = None
+        N_top = 0
+        for medium in lt.iterator(media):
+            pair = mp.get(media_map, medium)
+            artworks = me.getValue(pair)
+            N = lt.size(artworks)
+            N_artworks += N
+            if N > N_top:
+                top_medium = medium
+                N_top = N
+                top_artworks = artworks
+
+        return N_artworks, N_media, top_medium, top_artworks, N_top
+
+    return None
+
+
 def getTopNactionalities(catalog):
     """
     Retorna el TOP 10 de nacionalidades por obras.
@@ -406,44 +443,7 @@ def getCost(catalog, search):
     return round(total_cost, 2), round(total_weight, 2), artworks
 
 
-def getArtistID (catalog, artistname):
-    names = catalog['ArtistNames']
-    exists = mp.contains(names, artistname)
-    if exists:
-        pair = mp.get(names, artistname)
-        id = me.getValue(pair)
-        return id
-    return None
-
-
-def getMedia(catalog, artist):
-    IDs = catalog['ID-Media']
-    id = getArtistID(catalog, artist)
-    if id is not None:
-        pair = mp.get(IDs, id)
-        media_map = me.getValue(pair)
-        media = mp.keySet(media_map)
-        N_media = lt.size(media)
-        N_artworks = 0
-        top_artworks = None
-        top_medium = None
-        N_top = 0
-        for medium in lt.iterator(media):
-            pair = mp.get(media_map, medium)
-            artworks = me.getValue(pair)
-            N = lt.size(artworks)
-            N_artworks += N
-            if N > N_top:
-                top_medium = medium
-                N_top = N
-                top_artworks = artworks
-
-        return N_artworks, N_media, top_medium, top_artworks, N_top
-
-    return None
-
 # Funciones de comparación
-
 
 def cmpDateAcquired(artwork1, artwork2):
     """
@@ -466,6 +466,25 @@ def cmpBeginDate(artist1, artist2):
     return int(artist1['BeginDate']) < int(artist2['BeginDate'])
 
 
+def cmpOldest(artwork1, artwork2):
+    """
+    Retorna True si el 'Date' de artwork1
+    es mayor que el de artwork2.
+    """
+    if artwork1['Date'] == '' or artwork2['Date'] == '':
+        return False
+    else:
+        return artwork1['Date'] < artwork2['Date']
+
+
+def cmpExpensive(artwork1, artwork2):
+    """
+    Retorna True si el 'Cost' de artwork1
+    es mayor que el de artwork2.
+    """
+    return artwork1['TransCost (USD)'] > artwork2['TransCost (USD)']
+
+
 # Funciones de ordenamiento
 
 
@@ -474,3 +493,13 @@ def sortDateAcquired(catalog):
 
 def sortBeginDate(catalog):
     mg.sort(catalog['artists'], cmpBeginDate)
+
+
+def sortOldest(arrayList):
+    mg.sort(arrayList, cmpOldest)
+    return arrayList
+
+
+def sortExpensive(arrayList):
+    mg.sort(arrayList, cmpExpensive)
+    return arrayList
