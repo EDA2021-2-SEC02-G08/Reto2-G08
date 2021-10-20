@@ -249,6 +249,7 @@ while True:
         catalog = initCatalog()
         loadData(catalog)
         controller.sortBeginDate(catalog)
+        controller.sortDateAcquired(catalog)
         stop_time = time.perf_counter()
         delta_time = (stop_time - start_time) * 10000
         print(delta_time)

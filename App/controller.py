@@ -76,6 +76,10 @@ def loadArtworks(catalog):
 def sortBeginDate(catalog):
     return model.sortBeginDate(catalog)
 
+
+def sortDateAcquired(catalog):
+    return model.sortDateAcquired(catalog)
+
 # Funciones de consulta sobre el catálogo
 
 def getArtistsInRange(catalog, inicio, fin):

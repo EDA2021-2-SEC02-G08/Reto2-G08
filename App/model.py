@@ -46,31 +46,26 @@ def newCatalog():
 
     catalog = {'artists': None,
                'artworks': None,
-               'constituentID': None,
-               'dateAcquired': None,
-               'department': None,
+               'ArtistNames': None,
                'ID-Media': None,
+               'constituentID': None,
                'nationality': None,
-               'ArtistNames': None}
+               'department': None}
 
     catalog['artists'] = lt.newList('ARRAY_LIST')
-    catalog['artworks'] = lt.newList('SINGLE_LINKED')
+    catalog['artworks'] = lt.newList('ARRAY_LIST')
 
     """
     A continuacion se crean indices por diferentes criterios
     para llegar a la informacion consultada.
     Estos indices no replican informacion, solo la referencian.
     """
-
     """
-    Indice para almacenar las obras por fecha de adquisición.
-    Factor de carga = N / M
-    0.75 = 425 / 570,
-    donde 350 es el total de fechas de adquisición en el csv large.
+    Índice para almacenar el nombre de un artista y su ID.
     """
-    catalog['dateAcquired'] = mp.newMap(570,
-                                        maptype='CHAINING',
-                                        loadfactor=0.75)
+    catalog['ArtistNames'] = mp.newMap(22000,
+                                         maptype='CHAINING',
+                                         loadfactor=0.75)
 
     """
     Indice para almacenar las técnicas por ConstituentID.
@@ -86,14 +81,6 @@ def newCatalog():
     Indice para almacenar la nacionalidad por ID.
     """
     catalog['constituentID'] = mp.newMap(22000,
-                                         maptype='CHAINING',
-                                         loadfactor=0.75)
-
-    
-    """
-    Índice para almacenar el nombre de un artista y su ID.
-    """
-    catalog['ArtistNames'] = mp.newMap(22000,
                                          maptype='CHAINING',
                                          loadfactor=0.75)
 
@@ -131,7 +118,6 @@ def addArtist(catalog, artist):
 
 def addArtwork(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
-    addDateAcquired(catalog, artwork)
     addDepartment(catalog, artwork)
     artists_id = artwork['ConstituentID'].replace('[', '').replace(']', '')
     artists_id = artists_id.split(', ')
@@ -167,27 +153,6 @@ def addName(catalog, artist):
         pass
     else:
         mp.put(names, name, artist['ConstituentID'])
-
-
-def addDateAcquired(catalog, artwork):
-    """
-    Esta función crea la siguiente estructura de datos:
-    {'key': dateAcquired, 'value': [artworks]}
-    """
-    dateAcquired = artwork['DateAcquired']
-
-    if dateAcquired != '':
-        exist_date = mp.contains(catalog['dateAcquired'], dateAcquired)
-
-        if exist_date:
-            pass
-        else:
-            arrayList = lt.newList('ARRAY_LIST')
-            mp.put(catalog['dateAcquired'], dateAcquired, arrayList)
-
-        pair = mp.get(catalog['dateAcquired'], dateAcquired)
-        arrayList = me.getValue(pair)
-        lt.addLast(arrayList, artwork)
 
 
 def addIDMedia(catalog, id, artwork):
@@ -313,21 +278,34 @@ def costArtwork(artwork):
 # Funciones de busqueda
 
 
-def busquedabinaria(arrayList, element):
+def DateBinarySearch(catalog, element):
+    """
+    Retorna la posición de un elemento en una lista organizada.
+    Esta función encuentra la fecha de compra de una obra de arte.
+    En caso de no existir, retorna la última posición encontrada.
+    """
     low = 0
-    high = lt.size(arrayList) - 1
+    high = lt.size(catalog) - 1
     mid = 0
     element = date.fromisoformat(element)
 
     while low <= high:
         mid = (high + low) // 2
-        cmp = lt.getElement(arrayList, mid)
-        if date.fromisoformat(cmp) < element:
-            low = mid + 1
-        elif date.fromisoformat(cmp) > element:
-            high = mid - 1
+        cmp = lt.getElement(catalog, mid)
+        marcador = 1
+        if cmp['DateAcquired'] == '':
+            if marcador == 1:
+                low = mid + 1
+            else:
+                high = mid - 1
         else:
-            return mid
+            if date.fromisoformat(cmp['DateAcquired']) < element:
+                low = mid + 1
+            elif date.fromisoformat(cmp['DateAcquired']) > element:
+                high = mid - 1
+                marcador = 2
+            else:
+                return mid
 
     return mid
 
@@ -373,21 +351,13 @@ def getDateAcquired(catalog, inicio, fin):
     Retorna un arrayList con las obras de arte
     en un rango de fechas de adquisición.
     """
-    arrayList = mp.keySet(catalog['dateAcquired'])
-    sortDateAcquired(arrayList)
-    pos_inicio = busquedabinaria(arrayList, inicio)
-    pos_fin = busquedabinaria(arrayList, fin)
-    n = pos_fin - pos_inicio
-    subList = lt.subList(arrayList, pos_inicio, n)
-    artworks = lt.newList('ARRAY_LIST')
+    artworks = catalog['artworks']
+    pos_inicio = DateBinarySearch(artworks, inicio)
+    pos_fin = DateBinarySearch(artworks, fin)
+    n = pos_fin-pos_inicio
+    sublist = lt.subList(artworks, pos_inicio, n)
 
-    for element in lt.iterator(subList):
-        pair = mp.get(catalog['dateAcquired'], element)
-        value = me.getValue(pair)
-        for element in lt.iterator(value):
-            lt.addLast(artworks, element)
-
-    return artworks
+    return sublist
 
 
 def getTopNactionalities(catalog):
@@ -475,8 +445,18 @@ def getMedia(catalog, artist):
 # Funciones de comparación
 
 
-def cmpDateAcquired(date1, date2):
-    return date.fromisoformat(date1) < date.fromisoformat(date2)
+def cmpDateAcquired(artwork1, artwork2):
+    """
+    Retorna True si el 'DateAcquired' de artwork1
+    es menor que el de artwork2.
+    """
+    if artwork1['DateAcquired'] == '' or artwork2['DateAcquired'] == '':
+        return False
+    else:
+        artwork1 = date.fromisoformat(artwork1['DateAcquired'])
+        artwork2 = date.fromisoformat(artwork2['DateAcquired'])
+        return artwork1 < artwork2
+
 
 def cmpBeginDate(artist1, artist2):
     """
@@ -489,8 +469,8 @@ def cmpBeginDate(artist1, artist2):
 # Funciones de ordenamiento
 
 
-def sortDateAcquired(arrayList):
-    mg.sort(arrayList, cmpDateAcquired)
+def sortDateAcquired(catalog):
+    mg.sort(catalog['artworks'], cmpDateAcquired)
 
 def sortBeginDate(catalog):
     mg.sort(catalog['artists'], cmpBeginDate)
