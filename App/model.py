@@ -48,11 +48,12 @@ def newCatalog():
                'artworks': None,
                'constituentID': None,
                'dateAcquired': None,
-               'id_medium': None,
+               'department': None,
+               'ID-Media': None,
                'nationality': None,
-               'department': None}
+               'ArtistNames': None}
 
-    catalog['artists'] = lt.newList('SINGLE_LINKED')
+    catalog['artists'] = lt.newList('ARRAY_LIST')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
 
     """
@@ -72,12 +73,12 @@ def newCatalog():
                                         loadfactor=0.75)
 
     """
-    Indice para almacenar las técnicas por id_artist.
+    Indice para almacenar las técnicas por ConstituentID.
     Factor de carga = N / M
     0.75 = 16000 / 22000,
     donde 16000 es el total de artistas en el csv large.
     """
-    catalog['id_medium'] = mp.newMap(22000,
+    catalog['ID-Media'] = mp.newMap(22000,
                                      maptype='CHAINING',
                                      loadfactor=0.75)
 
@@ -85,6 +86,14 @@ def newCatalog():
     Indice para almacenar la nacionalidad por ID.
     """
     catalog['constituentID'] = mp.newMap(22000,
+                                         maptype='CHAINING',
+                                         loadfactor=0.75)
+
+    
+    """
+    Índice para almacenar el nombre de un artista y su ID.
+    """
+    catalog['ArtistNames'] = mp.newMap(22000,
                                          maptype='CHAINING',
                                          loadfactor=0.75)
 
@@ -116,6 +125,7 @@ def newCatalog():
 
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
+    addName(catalog, artist)
     addID(catalog, artist)
 
 
@@ -127,7 +137,7 @@ def addArtwork(catalog, artwork):
     artists_id = artists_id.split(', ')
 
     for id in artists_id:
-        addIdMedium(catalog, id, artwork)
+        addIDMedia(catalog, id, artwork)
         addNationality(catalog, id, artwork)
 
 
@@ -146,6 +156,17 @@ def addID(catalog, artist):
         pass
     else:
         mp.put(catalog['constituentID'], id, artist['Nationality'])
+
+
+def addName(catalog, artist):
+    names = catalog['ArtistNames']
+    name = artist['DisplayName']
+    name_exists = mp.contains(names, name)
+
+    if name_exists:
+        pass
+    else:
+        mp.put(names, name, artist['ConstituentID'])
 
 
 def addDateAcquired(catalog, artwork):
@@ -169,36 +190,37 @@ def addDateAcquired(catalog, artwork):
         lt.addLast(arrayList, artwork)
 
 
-def addIdMedium(catalog, id, artwork):
+def addIDMedia(catalog, id, artwork):
     """
     Esta función crea la siguiente estructura de datos
-    por id_artist en catalog['medium]:
+    por id_artist en catalog['medium']:
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
-    exist_id = mp.contains(catalog['id_medium'], id)
-    map = mp.newMap(70,
-                    maptype='CHAINING',
-                    loadfactor=0.75)
-    arrayList = lt.newList('ARRAY_LIST')
+    ids = catalog['ID-Media']
+    exist_id = mp.contains(ids, id)
 
     if exist_id:
         pass
     else:
-        mp.put(catalog['id_medium'], id, map)
+        map = mp.newMap(70,
+                    maptype='CHAINING',
+                    loadfactor=0.75)
+        mp.put(ids, id, map)
 
-    id = mp.get(catalog['id_medium'], id)
-    map = me.getValue(id)
+    key = mp.get(ids, id)
+    map = me.getValue(key)
     medium = artwork['Medium']
     exist_medium = mp.contains(map, medium)
 
     if exist_medium:
         pass
     else:
+        arrayList = lt.newList('ARRAY_LIST')
         mp.put(map, medium, arrayList)
 
     medium = mp.get(map, medium)
-    arrayList = me.getValue(medium)
-    lt.addLast(arrayList, artwork)
+    artworks = me.getValue(medium)
+    lt.addLast(artworks, artwork)
 
 
 def addNationality(catalog, id, artwork):
@@ -309,9 +331,42 @@ def busquedabinaria(arrayList, element):
 
     return mid
 
+def YearBinarySearch(catalog, element):
+    """
+    Retorna la posición de un elemento en una lista organizada.
+    Esta función encuentra el año de nacimiento del artista.
+    En caso de no existir, retorna la última posición encontrada.
+    """
+    low = 0
+    high = lt.size(catalog) - 1
+    mid = 0
+
+    while low <= high:
+        mid = (high + low) // 2
+        cmp = lt.getElement(catalog, mid)
+        if int(cmp['BeginDate']) < element:
+            low = mid + 1
+        elif int(cmp['BeginDate']) > element:
+            high = mid - 1
+        else:
+            return mid
+
+    return mid
 
 # Funciones de consulta
 
+def getArtistsInRange(catalog, inicio, fin):
+    """
+    Retorna un arrayList con los artistas
+    en un rango de tiempo.
+    """
+    artists = catalog['artists']
+    pos_inicio = YearBinarySearch(artists, inicio)
+    pos_fin = YearBinarySearch(artists, fin)
+    n = pos_fin-pos_inicio
+    sublist = lt.subList(artists, pos_inicio, n)
+
+    return sublist
 
 def getDateAcquired(catalog, inicio, fin):
     """
@@ -381,11 +436,54 @@ def getCost(catalog, search):
     return round(total_cost, 2), round(total_weight, 2), artworks
 
 
+def getArtistID (catalog, artistname):
+    names = catalog['ArtistNames']
+    exists = mp.contains(names, artistname)
+    if exists:
+        pair = mp.get(names, artistname)
+        id = me.getValue(pair)
+        return id
+    return None
+
+
+def getMedia(catalog, artist):
+    IDs = catalog['ID-Media']
+    id = getArtistID(catalog, artist)
+    if id is not None:
+        pair = mp.get(IDs, id)
+        media_map = me.getValue(pair)
+        media = mp.keySet(media_map)
+        N_media = lt.size(media)
+        N_artworks = 0
+        top_artworks = None
+        top_medium = None
+        N_top = 0
+        for medium in lt.iterator(media):
+            pair = mp.get(media_map, medium)
+            artworks = me.getValue(pair)
+            N = lt.size(artworks)
+            N_artworks += N
+            if N > N_top:
+                top_medium = medium
+                N_top = N
+                top_artworks = artworks
+
+        return N_artworks, N_media, top_medium, top_artworks, N_top
+
+    return None
+
 # Funciones de comparación
 
 
 def cmpDateAcquired(date1, date2):
     return date.fromisoformat(date1) < date.fromisoformat(date2)
+
+def cmpBeginDate(artist1, artist2):
+    """
+    Retorna True si el 'BeginDate' de artist1
+    es menor que el de artist2.
+    """
+    return int(artist1['BeginDate']) < int(artist2['BeginDate'])
 
 
 # Funciones de ordenamiento
@@ -393,3 +491,6 @@ def cmpDateAcquired(date1, date2):
 
 def sortDateAcquired(arrayList):
     mg.sort(arrayList, cmpDateAcquired)
+
+def sortBeginDate(catalog):
+    mg.sort(catalog['artists'], cmpBeginDate)

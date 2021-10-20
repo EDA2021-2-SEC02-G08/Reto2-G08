@@ -133,6 +133,34 @@ def countArtists(artworks):
 
 # Funciones imprimir
 
+def printArtistInfo (artist):
+    name = artist['DisplayName']
+    YOB = artist['BeginDate']
+    YOD = artist['EndDate']
+    nationality = artist['Nationality']
+    gender = artist['Gender']
+    print('Nombre: ' + name + '. Año de nacimiento: ' + YOB 
+           + '. Año de fallecimiento: ' + YOD + '. Nacionalidad: ' + nationality
+           + '. Género: ' + gender)
+
+
+def printArtistsInRange(result):
+    size = lt.size(result)
+    print ('\nHay ' + str(size) + ' artistas nacidos en este rango de tiempo.')
+    if size < 6:
+        print('Los artistas encontrados fueron:')
+        for artist in lt.iterator(result):
+            printArtistInfo(artist)
+    else:
+        print('Los primeros y últimos tres artistas encontrados fueron:')
+        first = lt.subList(result, 1, 3)
+        last = lt.subList(result, size-3, 3)
+        for artist in lt.iterator(first):
+            printArtistInfo(artist)
+
+        for artist in lt.iterator(last):
+            printArtistInfo(artist)
+
 
 def printDateAcquired(result):
     size = lt.size(result)
@@ -170,6 +198,28 @@ def printDepartment(result, search):
 
 
 # Menu
+def printArtworkInfo(artwork):
+    print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
+                ' Medio: ' + artwork['Medium'] +
+                ' Dimensiones: ' + artwork['Dimensions'])
+
+
+def printTechniques(result):
+    size = lt.size(result)
+    if size < 6:
+        print('Las obras con esta técnica son:')
+        for artwork in lt.iterator(result):
+            print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
+                ' Medio: ' + artwork['Medium'] +
+                ' Dimensiones: ' + artwork['Dimensions'])
+    else:
+        first = lt.subList(result, 1, 3)
+        last = lt.subList(result, size-3, 3)
+        for artwork in lt.iterator(first):
+            printArtworkInfo(artwork)
+
+        for artwork in lt.iterator(last):
+            printArtworkInfo(artwork)
 
 
 def printMenu():
@@ -198,6 +248,7 @@ while True:
         start_time = time.perf_counter()
         catalog = initCatalog()
         loadData(catalog)
+        controller.sortBeginDate(catalog)
         stop_time = time.perf_counter()
         delta_time = (stop_time - start_time) * 10000
         print(delta_time)
@@ -207,6 +258,8 @@ while True:
     elif inputs == 1:
         inicio = int(input('Ingrese el año inicial: '))
         fin = int(input('Ingrese el año final: '))
+        result = controller.getArtistsInRange(catalog, inicio, fin)
+        printArtistsInRange(result)
 
     elif inputs == 2:
         inicio = str(input('Ingrese la fecha inicial (AAAA-MM-DD): '))
@@ -215,7 +268,14 @@ while True:
         printDateAcquired(result)
 
     elif inputs == 3:
-        pass
+        artistname = str(input('Introduzca el nombre del artista a examinar: '))
+        num, num_techs, top_medium, artworks, n_top = controller.getMedia(catalog, artistname)
+        print('\n' + artistname + 'tiene ' + str(num) +
+              ' piezas a su nombre en el museo.')
+        print('Hay un total de ' + str(num_techs) + ' técnicas a su nombre.')
+        print('La técnica más utilizada por este/esta artista es ' + top_medium
+              + ' con un total de ' + str(n_top) + ' obras con esta técnica.')
+        printTechniques(artworks)
 
     elif inputs == 4:
         result = controller.getTopNactionalities(catalog)
