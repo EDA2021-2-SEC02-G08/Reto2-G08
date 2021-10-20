@@ -114,6 +114,7 @@ def newCatalog():
 
 def addArtist(catalog, artist):
     lt.addLast(catalog['artists'], artist)
+    addName(catalog, artist)
     addID(catalog, artist)
 
 
@@ -183,7 +184,7 @@ def addIDMedia(catalog, id, artwork):
     por id_artist en catalog['medium']:
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
-    ids = catalog['IDMedia']
+    ids = catalog['ID-Media']
     exist_id = mp.contains(ids, id)
 
     if exist_id:
@@ -352,12 +353,12 @@ def getArtistID (catalog, artistname):
     if exists:
         pair = mp.get(names, artistname)
         id = me.getValue(pair)
-        return int(id)
+        return id
     return None
 
 
 def getMedia(catalog, artist):
-    IDs = catalog['IDMedia']
+    IDs = catalog['ID-Media']
     id = getArtistID(catalog, artist)
     if id is not None:
         pair = mp.get(IDs, id)

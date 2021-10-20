@@ -146,8 +146,8 @@ def printArtistInfo (artist):
 
 def printArtistsInRange(result):
     size = lt.size(result)
-    print ('\nHay ' + str(size) + 'artistas nacidos en este rango de tiempo.')
-    if size > 6:
+    print ('\nHay ' + str(size) + ' artistas nacidos en este rango de tiempo.')
+    if size < 6:
         print('Los artistas encontrados fueron:')
         for artist in lt.iterator(result):
             printArtistInfo(artist)
