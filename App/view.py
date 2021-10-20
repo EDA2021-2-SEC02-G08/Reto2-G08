@@ -158,7 +158,7 @@ def printArtistsInRange(result):
         for artist in lt.iterator(first):
             printArtistInfo(artist)
 
-        for artist in lt.iterator(first):
+        for artist in lt.iterator(last):
             printArtistInfo(artist)
 
 
@@ -186,6 +186,30 @@ def printNationality(result):
     print('\nLos primeros y ultimo tres en la lista de obras ' +
           str(top10[0][0]) + ' son:\n')
     artworkInfo(top1)
+
+
+def printArtworkInfo(artwork):
+    print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
+                ' Medio: ' + artwork['Medium'] +
+                ' Dimensiones: ' + artwork['Dimensions'])
+
+
+def printTechniques(result):
+    size = lt.size(result)
+    if size < 6:
+        print('Las obras con esta técnica son:')
+        for artwork in lt.iterator(result):
+            print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
+                ' Medio: ' + artwork['Medium'] +
+                ' Dimensiones: ' + artwork['Dimensions'])
+    else:
+        first = lt.subList(result, 1, 3)
+        last = lt.subList(result, size-3, 3)
+        for artwork in lt.iterator(first):
+            printArtworkInfo(artwork)
+
+        for artwork in lt.iterator(last):
+            printArtworkInfo(artwork)
 
 
 def printMenu():
@@ -234,7 +258,14 @@ while True:
         printDateAcquired(result)
 
     elif inputs == 3:
-        pass
+        artistname = str(input('Introduzca el nombre del artista a examinar: '))
+        num, num_techs, top_medium, artworks, n_top = controller.getMedia(catalog, artistname)
+        print('\n' + artistname + 'tiene ' + str(num) +
+              ' piezas a su nombre en el museo.')
+        print('Hay un total de ' + str(num_techs) + ' técnicas a su nombre.')
+        print('La técnica más utilizada por este/esta artista es ' + top_medium
+              + ' con un total de ' + str(n_top) + ' obras con esta técnica.')
+        printTechniques(artworks)
 
     elif inputs == 4:
         result = controller.getTopNactionalities(catalog)

@@ -48,8 +48,9 @@ def newCatalog():
                'artworks': None,
                'constituentID': None,
                'dateAcquired': None,
-               'id_medium': None,
-               'nationality': None}
+               'ID-Media': None,
+               'nationality': None,
+               'ArtistNames': None}
 
     catalog['artists'] = lt.newList('ARRAY_LIST')
     catalog['artworks'] = lt.newList('SINGLE_LINKED')
@@ -71,12 +72,12 @@ def newCatalog():
                                         loadfactor=0.75)
 
     """
-    Indice para almacenar las técnicas por id_artist.
+    Indice para almacenar las técnicas por ConstituentID.
     Factor de carga = N / M
     0.75 = 16000 / 22000,
     donde 16000 es el total de artistas en el csv large.
     """
-    catalog['id_medium'] = mp.newMap(22000,
+    catalog['ID-Media'] = mp.newMap(22000,
                                      maptype='CHAINING',
                                      loadfactor=0.75)
 
@@ -84,6 +85,14 @@ def newCatalog():
     Indice para almacenar la nacionalidad por ID.
     """
     catalog['constituentID'] = mp.newMap(22000,
+                                         maptype='CHAINING',
+                                         loadfactor=0.75)
+
+    
+    """
+    Índice para almacenar el nombre de un artista y su ID.
+    """
+    catalog['ArtistNames'] = mp.newMap(22000,
                                          maptype='CHAINING',
                                          loadfactor=0.75)
 
@@ -115,7 +124,7 @@ def addArtwork(catalog, artwork):
     artists_id = artists_id.split(', ')
 
     for id in artists_id:
-        addIdMedium(catalog, id, artwork)
+        addIDMedia(catalog, id, artwork)
         addNationality(catalog, id, artwork)
 
 
@@ -134,6 +143,17 @@ def addID(catalog, artist):
         pass
     else:
         mp.put(catalog['constituentID'], id, artist['Nationality'])
+
+
+def addName(catalog, artist):
+    names = catalog['ArtistNames']
+    name = artist['DisplayName']
+    name_exists = mp.contains(names, name)
+
+    if name_exists:
+        pass
+    else:
+        mp.put(names, name, artist['ConstituentID'])
 
 
 def addDateAcquired(catalog, artwork):
@@ -157,36 +177,37 @@ def addDateAcquired(catalog, artwork):
         lt.addLast(arrayList, artwork)
 
 
-def addIdMedium(catalog, id, artwork):
+def addIDMedia(catalog, id, artwork):
     """
     Esta función crea la siguiente estructura de datos
     por id_artist en catalog['medium']:
     {'key': id, 'value': {'key': 'medium', 'value':[artworks]}}
     """
-    exist_id = mp.contains(catalog['id_medium'], id)
-    map = mp.newMap(70,
-                    maptype='CHAINING',
-                    loadfactor=0.75)
-    arrayList = lt.newList('ARRAY_LIST')
+    ids = catalog['IDMedia']
+    exist_id = mp.contains(ids, id)
 
     if exist_id:
         pass
     else:
-        mp.put(catalog['id_medium'], id, map)
+        map = mp.newMap(70,
+                    maptype='CHAINING',
+                    loadfactor=0.75)
+        mp.put(ids, id, map)
 
-    id = mp.get(catalog['id_medium'], id)
-    map = me.getValue(id)
+    key = mp.get(ids, id)
+    map = me.getValue(key)
     medium = artwork['Medium']
     exist_medium = mp.contains(map, medium)
 
     if exist_medium:
         pass
     else:
+        arrayList = lt.newList('ARRAY_LIST')
         mp.put(map, medium, arrayList)
 
     medium = mp.get(map, medium)
-    arrayList = me.getValue(medium)
-    lt.addLast(arrayList, artwork)
+    artworks = me.getValue(medium)
+    lt.addLast(artworks, artwork)
 
 
 def addNationality(catalog, id, artwork):
@@ -207,6 +228,7 @@ def addNationality(catalog, id, artwork):
     pair = mp.get(catalog['nationality'], nationality)
     arrayList = me.getValue(pair)
     lt.addLast(arrayList, artwork)
+
 
 
 # Funciones auxiliares
@@ -323,6 +345,42 @@ def getTopNactionalities(catalog):
 
     return top10, arrayList
 
+
+def getArtistID (catalog, artistname):
+    names = catalog['ArtistNames']
+    exists = mp.contains(names, artistname)
+    if exists:
+        pair = mp.get(names, artistname)
+        id = me.getValue(pair)
+        return int(id)
+    return None
+
+
+def getMedia(catalog, artist):
+    IDs = catalog['IDMedia']
+    id = getArtistID(catalog, artist)
+    if id is not None:
+        pair = mp.get(IDs, id)
+        media_map = me.getValue(pair)
+        media = mp.keySet(media_map)
+        N_media = lt.size(media)
+        N_artworks = 0
+        top_artworks = None
+        top_medium = None
+        N_top = 0
+        for medium in lt.iterator(media):
+            pair = mp.get(media_map, medium)
+            artworks = me.getValue(pair)
+            N = lt.size(artworks)
+            N_artworks += N
+            if N > N_top:
+                top_medium = medium
+                N_top = N
+                top_artworks = artworks
+
+        return N_artworks, N_media, top_medium, top_artworks, N_top
+
+    return None
 
 # Funciones de comparación
 

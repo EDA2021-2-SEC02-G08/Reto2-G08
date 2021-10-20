@@ -88,3 +88,6 @@ def getDateAcquired(catalog, inicio, fin):
 
 def getTopNactionalities(catalog):
     return model.getTopNactionalities(catalog)
+
+def getMedia(catalog, artist):
+    return model.getMedia(catalog, artist)
