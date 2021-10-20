@@ -251,6 +251,43 @@ def take(n, iterable):
     return list(islice(iterable, n))
 
 
+def costArtwork(artwork):
+    """
+    Esta función retorna el costo total de transporte
+    por obra en un determinado departamento del MoMA.
+    """
+    # Weight
+    weight = artwork['Weight (kg)']
+    cost1 = 0
+    if weight != '':
+        cost1 = float(weight) * 72
+    # m2 or m3
+    count = 0
+    if artwork['Height (cm)'] == '':
+        height = 1
+    else:
+        height = float(artwork['Height (cm)']) / 1000
+        count += 1
+    if artwork['Length (cm)'] == '':
+        length = 1
+    else:
+        length = float(artwork['Length (cm)']) / 1000
+        count += 1
+    if artwork['Width (cm)'] == '':
+        width = 1
+    else:
+        width = float(artwork['Width (cm)']) / 1000
+        count += 1
+    if count >= 2 and cost1 > 0:
+        cost2 = (height * length * width) * 72
+        if cost2 >= cost1:
+            return cost2
+        else:
+            return cost1
+
+    return 48
+
+
 # Funciones de busqueda
 
 
@@ -322,6 +359,26 @@ def getTopNactionalities(catalog):
     arrayList = me.getValue(pair)
 
     return top10, arrayList
+
+
+def getCost(catalog, search):
+    """
+    Retorna el costo aproximado de transportar todas
+    las obras de un determinado departamento.
+    """
+    department = mp.get(catalog['department'], search)
+    artworks = me.getValue(department)
+    total_cost = 0
+    total_weight = 0
+
+    for artwork in lt.iterator(artworks):
+        cost = costArtwork(artwork)
+        total_cost += cost
+        artwork['TransCost (USD)'] = cost
+        if artwork['Weight (kg)'] != '':
+            total_weight += float(artwork['Weight (kg)'])
+
+    return round(total_cost, 2), round(total_weight, 2), artworks
 
 
 # Funciones de comparación

@@ -26,7 +26,6 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
-from DISClib.ADT import map as mp
 assert cf
 
 
@@ -161,6 +160,18 @@ def printNationality(result):
     artworkInfo(top1)
 
 
+def printDepartment(result, search):
+    artworks = result[2]
+    size = lt.size(artworks)
+    print('\nEl MoMA va a transportar ' + str(size) +
+          ' objetos del departamento de ' + str(search))
+    print('Peso estimado (kg): ' + str(result[1]))
+    print('El costo estimado de transporte (USD): ' + str(result[0]))
+
+
+# Menu
+
+
 def printMenu():
     print("\nBienvenido")
     print('0- Cargar Datos')
@@ -208,11 +219,12 @@ while True:
 
     elif inputs == 4:
         result = controller.getTopNactionalities(catalog)
-        # printNationality(result)
-        print(mp.get(catalog['department'], 'Drawings & Prints'))
+        printNationality(result)
 
     elif inputs == 5:
-        pass
+        search = str(input('Ingrese el departamento del MoMA: '))
+        result = controller.getCost(catalog, search)
+        printDepartment(result, search)
 
     else:
         sys.exit(0)
