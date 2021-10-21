@@ -64,8 +64,8 @@ def newCatalog():
     Índice para almacenar el nombre de un artista y su ID.
     """
     catalog['ArtistNames'] = mp.newMap(22000,
-                                         maptype='CHAINING',
-                                         loadfactor=0.75)
+                                       maptype='CHAINING',
+                                       loadfactor=0.75)
 
     """
     Indice para almacenar las técnicas por ConstituentID.
@@ -74,8 +74,8 @@ def newCatalog():
     donde 16000 es el total de artistas en el csv large.
     """
     catalog['ID-Media'] = mp.newMap(22000,
-                                     maptype='CHAINING',
-                                     loadfactor=0.75)
+                                    maptype='CHAINING',
+                                    loadfactor=0.75)
 
     """
     Indice para almacenar la nacionalidad por ID.
@@ -168,8 +168,8 @@ def addIDMedia(catalog, id, artwork):
         pass
     else:
         map = mp.newMap(70,
-                    maptype='CHAINING',
-                    loadfactor=0.75)
+                        maptype='CHAINING',
+                        loadfactor=0.75)
         mp.put(ids, id, map)
 
     key = mp.get(ids, id)
@@ -253,26 +253,32 @@ def costArtwork(artwork):
     if artwork['Height (cm)'] == '':
         height = 1
     else:
-        height = float(artwork['Height (cm)']) / 1000
+        height = float(artwork['Height (cm)']) / 100
         count += 1
     if artwork['Length (cm)'] == '':
         length = 1
     else:
-        length = float(artwork['Length (cm)']) / 1000
+        length = float(artwork['Length (cm)']) / 100
         count += 1
     if artwork['Width (cm)'] == '':
         width = 1
     else:
-        width = float(artwork['Width (cm)']) / 1000
+        width = float(artwork['Width (cm)']) / 100
         count += 1
-    if count >= 2 and cost1 > 0:
+    if count >= 2:
         cost2 = (height * length * width) * 72
-        if cost2 >= cost1:
-            return cost2
+        if cost1 > 0:
+            if cost2 >= cost1:
+                return cost2
+            else:
+                return cost1
         else:
+            return cost2
+    else:
+        if cost1 > 0:
             return cost1
-
-    return 48
+        else:
+            return 48
 
 
 # Funciones de busqueda
@@ -309,6 +315,7 @@ def DateBinarySearch(catalog, element):
 
     return mid
 
+
 def YearBinarySearch(catalog, element):
     """
     Retorna la posición de un elemento en una lista organizada.
@@ -331,7 +338,9 @@ def YearBinarySearch(catalog, element):
 
     return mid
 
+
 # Funciones de consulta
+
 
 def getArtistsInRange(catalog, inicio, fin):
     """
@@ -345,6 +354,7 @@ def getArtistsInRange(catalog, inicio, fin):
     sublist = lt.subList(artists, pos_inicio, n)
 
     return sublist
+
 
 def getDateAcquired(catalog, inicio, fin):
     """
@@ -360,7 +370,7 @@ def getDateAcquired(catalog, inicio, fin):
     return sublist
 
 
-def getArtistID (catalog, artistname):
+def getArtistID(catalog, artistname):
     names = catalog['ArtistNames']
     exists = mp.contains(names, artistname)
     if exists:
@@ -490,6 +500,7 @@ def cmpExpensive(artwork1, artwork2):
 
 def sortDateAcquired(catalog):
     mg.sort(catalog['artworks'], cmpDateAcquired)
+
 
 def sortBeginDate(catalog):
     mg.sort(catalog['artists'], cmpBeginDate)

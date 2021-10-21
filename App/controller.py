@@ -73,6 +73,7 @@ def loadArtworks(catalog):
 
 # Funciones de ordenamiento
 
+
 def sortBeginDate(catalog):
     return model.sortBeginDate(catalog)
 

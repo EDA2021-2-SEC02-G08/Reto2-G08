@@ -111,20 +111,21 @@ def countArtists(artworks):
 
 # Funciones imprimir
 
-def printArtistInfo (artist):
+
+def printArtistInfo(artist):
     name = artist['DisplayName']
     YOB = artist['BeginDate']
     YOD = artist['EndDate']
     nationality = artist['Nationality']
     gender = artist['Gender']
-    print('Nombre: ' + name + '. Año de nacimiento: ' + YOB 
-           + '. Año de fallecimiento: ' + YOD + '. Nacionalidad: ' + nationality
-           + '. Género: ' + gender)
+    print('Nombre: ' + name + '. Año de nacimiento: ' + YOB
+          + '. Año de fallecimiento: ' + YOD + '. Nacionalidad: ' + nationality
+          + '. Género: ' + gender)
 
 
 def printArtistsInRange(result):
     size = lt.size(result)
-    print ('\nHay ' + str(size) + ' artistas nacidos en este rango de tiempo.')
+    print('\nHay ' + str(size) + ' artistas nacidos en este rango de tiempo.')
     if size <= 6:
         print('Los artistas encontrados fueron:')
         for artist in lt.iterator(result):
@@ -177,22 +178,22 @@ def printDepartment(result, search):
 
 def printArtworkInfo(artwork):
     print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
-                ' Medio: ' + artwork['Medium'] +
-                ' Dimensiones: ' + artwork['Dimensions'])
+          ' Medio: ' + artwork['Medium'] +
+          ' Dimensiones: ' + artwork['Dimensions'])
 
 
 def printArtworkInfoWithDate(artwork):
-    print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] + 
-                ' Fecha de adquisición: ' + artwork['DateAcquired'] +
-                ' Medio: ' + artwork['Medium'] +
-                ' Dimensiones: ' + artwork['Dimensions'])
+    print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
+          ' Fecha de adquisición: ' + artwork['DateAcquired'] +
+          ' Medio: ' + artwork['Medium'] +
+          ' Dimensiones: ' + artwork['Dimensions'])
 
 
 def printArtworkInfoWithCost(artwork):
     print('Título: ' + artwork['Title'] + ' Fecha: ' + artwork['Date'] +
-                ' Medio: ' + artwork['Medium'] +
-                ' Dimensiones: ' + artwork['Dimensions'] + ' Costo (USD): ' +
-                str(artwork['TransCost (USD)']))
+          ' Medio: ' + artwork['Medium'] +
+          ' Dimensiones: ' + artwork['Dimensions'] + ' Costo (USD): ' +
+          str(artwork['TransCost (USD)']))
 
 
 def printTechniques(result):
@@ -260,9 +261,10 @@ while True:
         printDateAcquired(result)
 
     elif inputs == 3:
-        artistname = str(input('Introduzca el nombre del artista a examinar: '))
-        num, num_techs, top_medium, artworks, n_top = controller.getMedia(catalog, artistname)
-        print('\n' + artistname + 'tiene ' + str(num) +
+        name = str(input('Introduzca el nombre del artista: '))
+        result = controller.getMedia(catalog, name)
+        num, num_techs, top_medium, artworks, n_top = result
+        print('\n' + name + 'tiene ' + str(num) +
               ' piezas a su nombre en el museo.')
         print('Hay un total de ' + str(num_techs) + ' técnicas a su nombre.')
         print('La técnica más utilizada por este/esta artista es ' + top_medium
@@ -283,6 +285,7 @@ while True:
         mostExpensive = lt.subList(sorted, 1, 5)
         sorted = controller.sortOldest(artworks)
         oldest = lt.subList(sorted, 1, 5)
+
         print('\nLos 5 objetos más costosos de transportar son:')
         for artwork in lt.iterator(mostExpensive):
             printArtworkInfoWithCost(artwork)
@@ -290,9 +293,6 @@ while True:
         print('\nLos 5 objetos más antiguos a transportar son:')
         for artwork in lt.iterator(oldest):
             printArtworkInfoWithCost(artwork)
-
-
-
     else:
         sys.exit(0)
 
